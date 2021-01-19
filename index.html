@@ -1,46 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" 
-      href="https://cdn.jsdelivr.net/gh/spiermar/d3-flame-graph@1.0.4/dist/d3.flameGraph.min.css" 
-      integrity="sha256-w762vSe6WGrkVZ7gEOpnn2Y+FSmAGlX77jYj7nhuCyY=" 
-      crossorigin="anonymous" 
-    />
-  </head>
-  <body>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-      async function get(id) {
-        axios.get(`https://habr.com/ru/post/${id}/`, {mode: 'no-cors'})
-        .then(function (response) {
-          if ( response.data.indexOf('<ul class="content-list content-list_comments" id="comments-list">') && response.data.indexOf('<div class="js-form_placeholder">')) {
-            const begin = response.data.indexOf('<ul class="content-list content-list_comments" id="comments-list">');
-            const end = response.data.indexOf('<div class="js-form_placeholder">');
+<head>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/d3-flame-graph@4.0.6/dist/d3-flamegraph.css">
+</head>
+<body>
+  <div id="chart"></div>
+  <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/d3-flame-graph@4.0.6/dist/d3-flamegraph.min.js"></script>
+  <script type="text/javascript">
+  var chart = flamegraph()
+    .width(960);
 
-            const commentsHTML = response.data.slice(begin, end).trim().split('<li class="content-list__item content-list__item_comment js-comment');
-            const nOfComments = commentsHTML.length - 1;
-            console.log(nOfComments);
-
-            let parser = new DOMParser().parseFromString(response.data, 'text/html');
-
-            let data = {
-              children: []
-            };
-            commentsHTML.forEach(c => {
-              let id = c
-              let parentId = 0
-            });
-          }
-        })
-        .catch(function (error) {
-          console.log(error.message);
-        })
-      }
-
-      //get(537606); //349
-      get(537994); //3
-      //get(537202); //0
-    </script>
-  </body>
-</html>
+  d3.json("data.json", function(error, data) {
+    if (error) return console.warn(error);
+    d3.select("#chart")
+      .datum(data)
+      .call(chart);
+  });
+  </script>
+</body>
