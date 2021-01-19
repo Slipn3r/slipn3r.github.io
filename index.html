@@ -7,164 +7,40 @@
       integrity="sha256-w762vSe6WGrkVZ7gEOpnn2Y+FSmAGlX77jYj7nhuCyY=" 
       crossorigin="anonymous" 
     />
-
-    <style>
-    .comment {
-      max-width: 600px;
-      padding: 5px;
-    }
-    .highlighted {
-      background: #e6e6e6;
-    }
-    .muted{
-      color: gray;
-    }
-    .d3-flame-graph-tip {
-      max-width: 500px;
-    }
-    .d3-flame-graph-tip a {
-      color: white !important;
-    }
-    #chart svg {
-      display: block;
-      margin: 10px auto;
-    }
-    </style>
   </head>
   <body>
-    <div class="container">
-      <div>
-        <div style="display: none;  justify-content: space-between" id="pullother">
-          <p>
-          Read another thread: <input type="text" placeholder="Thread ID" id="threadid" /> <button onClick="pullOtherThread()">Pull</button>
-          </p>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      async function get(id) {
+        axios.get(`https://habr.com/ru/post/${id}/`, {mode: 'no-cors'})
+        .then(function (response) {
+          if ( response.data.indexOf('<ul class="content-list content-list_comments" id="comments-list">') && response.data.indexOf('<div class="js-form_placeholder">')) {
+            const begin = response.data.indexOf('<ul class="content-list content-list_comments" id="comments-list">');
+            const end = response.data.indexOf('<div class="js-form_placeholder">');
 
-      <p><span>Or use this bookmark: <a href="javascript:location.href='https://trungdq88.github.io/hn-big-threads/#' + location.href.split('item?id=')[1]">Flame It!</a> ⬅ drag this to your bookmark bar, then click it while in a HN post.</span></p>
+            const commentsHTML = response.data.slice(begin, end).trim().split('<li class="content-list__item content-list__item_comment js-comment');
+            const nOfComments = commentsHTML.length - 1;
+            console.log(nOfComments);
 
-      <p><span><a href="https://github.com/trungdq88/hn-big-threads">GitHub</a></span></p>
-        </div>
-        <div id="chart">
-        </div>
-      </div>
-      <div id="text">
-        Loading... https://news.ycombinator.com/item?id=25706993
-      </div>
-    </div>
+            let parser = new DOMParser().parseFromString(response.data, 'text/html');
 
-    <script type="text/javascript" 
-      src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.10.0/d3.min.js" 
-      integrity="sha256-r7j1FXNTvPzHR41+V71Jvej6fIq4v4Kzu5ee7J/RitM=" 
-      crossorigin="anonymous">
-    </script>
-    <script type="text/javascript" 
-      src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js" 
-      integrity="sha256-z0A2CQF8xxCKuOJsn4sJ5HBjxiHHRAfTX8hDF4RSN5s=" 
-      crossorigin="anonymous">
-    </script>
-    <script type="text/javascript" 
-      src="https://cdn.jsdelivr.net/gh/spiermar/d3-flame-graph@1.0.4/dist/d3.flameGraph.min.js" 
-      integrity="sha256-I1CkrWbmjv+GWjgbulJ4i0vbzdrDGfxqdye2qNlhG3Q=" 
-      crossorigin="anonymous">
-    </script>
-
-    <script src="code.js"></script>
-    <script type="text/javascript">
-    let pullCount = 0
-    let totalComment = 0
-
-    var flameGraph = d3.flameGraph()
-      .width(960)
-      .cellHeight(18)
-      .transitionDuration(750)
-      .transitionEase(d3.easeCubic)
-      .sort(false)
-      //Example to sort in reverse order
-      //.sort(function(a,b){ return d3.descending(a.data.name, b.data.name);})
-      .title("");
-
-    // Example on how to use custom tooltips using d3-tip.
-    var TIP_LENGTH = Infinity;
-    var tip = d3.tip()
-      .direction("s")
-      .offset([8, 0])
-      .attr('class', 'd3-flame-graph-tip')
-      .html(function(d) {
-        return '@' + d.data.name + ':<br/><br/>' + (d.data.text || '').substring(0, TIP_LENGTH) + ((d.data.text || '').length > TIP_LENGTH ? '...' : '');
-      });
-
-    flameGraph.tooltip(tip);
-    // Example on how to use custom labels
-    // var label = function(d) {
-    //  return "name: " + d.data.name + ", value: " + d.data.value;
-    // }
-
-    // flameGraph.label(label);
-
-    if (location.hash) {
-      loadThread(location.hash.replace('#', ''))
-
-    } else {
-    d3.json("data.json", function(error, data) {
-      if (error) return console.warn(error);
-      d3.select("#chart")
-          .datum(data)
-          .call(flameGraph);
-      pullother.style.display = 'flex';
-      text.innerText = "click an item in the graph to view comment. You are viewing https://news.ycombinator.com/item?id=25706993"
-
-      flameGraph.onClick(loadComments);
-    });
-    }
-
-    function loadComments(d) {
-        var node = d;
-        var parents = []
-        do {
-          parents.push(node.data)
-          node = node.parent
-        } while (node)
-
-        parents.reverse()
-
-      var immediateChildren = (d.data.children || [])
-
-      function render(conversation, level = false) {
-        return conversation.map((_, i) => `<div class="comment ${level && i === conversation.length - 1 ? 'highlighted' : ''}" style="${level ? `padding-left: ${30 * i}px;` : ''}"><b><a href="https://news.ycombinator.com/item?id=${_.id}">${_.name}</a></b> - <i class="muted">${_.children ? _.children.length : 0} direct replies, ${_.value} total comments </i><br/>${_.text}</div>`).join('');
+            let data = {
+              children: []
+            };
+            commentsHTML.forEach(c => {
+              let id = c
+              let parentId = 0
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error.message);
+        })
       }
 
-      text.innerHTML = render(parents, true) + `<br/><div class="comment" style="padding-left: ${parents.length * 30}px"><p><i class="muted">Direct replies:</i></p>` + render(immediateChildren) + '</div>';
-
-      }
-
-    function pullOtherThread() {
-      loadThread(threadid.value)
-    }
-
-    async function loadThread(id) {
-      pullCount = 0
-      text.innerHTML = "Loading... <span id=\"pull-status\"></span> <br/> <br/> Pulling comments (via HN API) from your browser... <br/>Long threads may take a long long time! (check Network tab in dev tool).<br/> Check /code-server.js to see how to pull comments from server-side"
-      const data = await start(id);
-      console.log(data)
-      d3.select("#chart")
-          .datum(data)
-          .call(flameGraph);
-
-      flameGraph.onClick(loadComments);
-
-      text.innerText = "click an item in the graph to view comment"
-      pullother.style.display = 'flex';
-    }
-
-    window.pullCallback = (descendants) => {
-      totalComment = descendants;
-      pullCount++;
-      const status = document.getElementById('pull-status');
-      status && (status.innerText = `${pullCount}/${totalComment} (${Math.round(100 * pullCount / totalComment)}%)`);
-    };
+      //get(537606); //349
+      get(537994); //3
+      //get(537202); //0
     </script>
-
-
-    <hr/>
-    <small>I also built a macOS app for devs, check it out 😊 <a href="https://devutils.app">https://devutils.app</a></small>
   </body>
 </html>
