@@ -10,11 +10,10 @@ async function get(id) {
 
       const commentsHTML = response.data.slice(begin, end).trim().split('<li class="content-list__item content-list__item_comment js-comment');
       commentsHTML.shift();
-      const nOfComments = commentsHTML.length;
 
       let data = {
         name: 'Комментарии',
-        value: 0,
+        value: 1,
         body: '',
         children: []
       };
@@ -43,7 +42,6 @@ async function get(id) {
           addChild(cData, data.children)
         }
       });
-      //data.value = data.children.length
       fs.writeFileSync('data.json', JSON.stringify(data), 'utf-8');
     }
   })
